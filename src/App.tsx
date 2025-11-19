@@ -2,7 +2,7 @@ import Counter from './Counter'
 import Whether from './Whether'
 import TodoApp  from './TodoApp'
 import Navbar from './components/Navbar'
-// import Home from './components/Home'
+import Home from './components/Home'
 import './App.css'
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
  
 <Navbar />
 <div className='content'>
-  {/* <Home /> */}
+  <Home />
    <Counter />
   <TodoApp />
   <Whether />
