@@ -7,7 +7,6 @@ const Home = () => {
    const apiUrl = import.meta.env.DEV && import.meta.env.VITE_USE_JSON_SERVER === 'true'
      ? 'https://beginner-react-679f.vercel.app'
      : '/blogs.json';
-  console.log('1111111',apiUrl,import.meta.env.DEV,import.meta.env.VITE_USE_JSON_SERVER);
    const {data:blogs,error,loading} = useFetch(apiUrl)
 
     return (<div className="home">
