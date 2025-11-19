@@ -13,7 +13,6 @@ function CounterButton({increment,decrement}:CounterButtonProps) {
     </div>
   )
 }
-
 function Counter() {
   const [count,setCount] = useState(0);
   
