@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
 
+interface Movie {
+  id: number;
+  title: string;
+  overview: string;
+  release_date: string;
+  vote_average: number;
+  poster_path: string | null;
+}
+
 const DefaultList = () => {
-  const [movies, setMovie] = useState<any[]>([])
+  const [movies, setMovie] = useState<Movie[]>([])
   useEffect(() => {
     const controller = new AbortController();
     const getMovies = async () => {
       try {
+        const API_KEY = import.meta.env.VITE_MOVIE_API_KEY || "";
         const response = await fetch(
-          "https://api.themoviedb.org/3/discover/movie?api_key=f43ec82a5f24fe6190891894b7436c7a",
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}`,
           {
             headers: { "content-type": "application/json" },
             method: "GET",
@@ -20,8 +30,8 @@ const DefaultList = () => {
           console.log('data', data.results);
           setMovie(data.results);
         }
-      } catch (error: any) {
-        if (error.name !== "AbortError") {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name !== "AbortError") {
           console.log("error", error);
         }
       }
