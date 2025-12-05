@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { moviesAPI } from '../services/api';
 import './CreateMovie.css';
+
+// Static image URL as provided
+const STATIC_IMAGE_URL = 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU';
 
 function CreateMovie() {
   const navigate = useNavigate();
@@ -8,6 +13,8 @@ function CreateMovie() {
   const [publishingYear, setPublishingYear] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -44,12 +51,61 @@ function CreateMovie() {
     setIsDragging(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Movie data:', { title, publishingYear, image: selectedImage });
-    // Handle movie creation logic here
-    // After successful creation, navigate back to movies list
-    // navigate('/movies');
+    setError('');
+    setLoading(true);
+
+    try {
+      // Validate publishing year
+      const year = parseInt(publishingYear, 10);
+      if (isNaN(year) || year < 1888 || year > new Date().getFullYear() + 1) {
+        setError('Please enter a valid publishing year (1888 to ' + (new Date().getFullYear() + 1) + ')');
+        setLoading(false);
+        return;
+      }
+
+      // Use static image URL as specified
+      const movieData = {
+        title: title.trim(),
+        publishYear: year,
+        imageURL: STATIC_IMAGE_URL,
+      };
+
+      const response = await moviesAPI.create(movieData);
+
+      // Show success toast
+      toast.success(response.message || 'Movie created successfully!');
+
+      // Navigate back to movies list on success
+      navigate('/movies');
+    } catch (err: unknown) {
+      // Extract error message from different response formats
+      let errorMessage = 'Failed to create movie. Please try again.';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string | string[]; error?: string } } };
+        if (axiosError.response?.data) {
+          if (axiosError.response.data.message) {
+            errorMessage = Array.isArray(axiosError.response.data.message) 
+              ? axiosError.response.data.message[0] 
+              : axiosError.response.data.message;
+          } else if (axiosError.response.data.error) {
+            errorMessage = axiosError.response.data.error;
+          }
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      // Set error state for inline display
+      setError(errorMessage);
+      
+      // Show error toast notification
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -107,15 +163,23 @@ function CreateMovie() {
 
               <div className="input-field">
                 <input
-                  type="text"
+                  type="number"
                   id="publishing-year"
                   placeholder="Publishing year"
                   value={publishingYear}
                   onChange={(e) => setPublishingYear(e.target.value)}
                   className="form-input"
+                  min="1888"
+                  max={new Date().getFullYear() + 1}
                   required
                 />
               </div>
+
+              {error && (
+                <div className="error-message" style={{ color: 'red', marginTop: '10px', marginBottom: '10px' }}>
+                  {error}
+                </div>
+              )}
 
               <div className="form-buttons">
                 <button
@@ -128,8 +192,9 @@ function CreateMovie() {
                 <button
                   type="submit"
                   className="submit-button"
+                  disabled={loading}
                 >
-                  Submit
+                  {loading ? 'Submitting...' : 'Submit'}
                 </button>
               </div>
             </div>
