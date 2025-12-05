@@ -91,6 +91,17 @@ export interface CreateMovieResponse {
   message: string;
 }
 
+export interface UpdateMovieRequest {
+  title?: string;
+  publishYear?: number;
+  imageURL?: string;
+}
+
+export interface UpdateMovieResponse {
+  movie: Movie;
+  message: string;
+}
+
 export interface MoviesListResponse {
   movies: Movie[];
   total: number;
@@ -169,6 +180,42 @@ export const moviesAPI = {
     }
     
     return response.data as MoviesListResponse;
+  },
+  getOne: async (id: string): Promise<{ movie: Movie; message: string }> => {
+    const response = await api.get(`/movies/${id}`);
+    
+    // Handle transformed response format
+    if (response.data && typeof response.data === 'object') {
+      if ('data' in response.data && 'success' in response.data && response.data.success) {
+        const data = response.data.data;
+        if (data && typeof data === 'object' && 'movie' in data) {
+          return data as { movie: Movie; message: string };
+        }
+      }
+      if ('movie' in response.data) {
+        return response.data as { movie: Movie; message: string };
+      }
+    }
+    
+    return response.data as { movie: Movie; message: string };
+  },
+  update: async (id: string, movieData: UpdateMovieRequest): Promise<UpdateMovieResponse> => {
+    const response = await api.patch<UpdateMovieResponse>(`/movies/${id}`, movieData);
+    
+    // Handle transformed response format
+    if (response.data && typeof response.data === 'object') {
+      if ('data' in response.data && 'success' in response.data && response.data.success) {
+        const data = response.data.data;
+        if (data && typeof data === 'object' && 'movie' in data) {
+          return data as UpdateMovieResponse;
+        }
+      }
+      if ('movie' in response.data) {
+        return response.data as UpdateMovieResponse;
+      }
+    }
+    
+    return response.data as UpdateMovieResponse;
   },
 };
 

@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import Login from './components/Login'
 import MovieList from './components/MovieList'
 import CreateMovie from './components/CreateMovie'
+import EditMovie from './components/EditMovie'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/movies" element={<MovieList />} />
         <Route path="/movies/create" element={<CreateMovie />} />
+        <Route path="/movies/:id/edit" element={<EditMovie />} />
       </Routes>
       <ToastContainer
         position="top-right"

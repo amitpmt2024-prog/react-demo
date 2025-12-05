@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { authAPI, moviesAPI } from '../services/api';
+import { authAPI } from '../services/api';
 import './Login.css';
 
 function Login() {
@@ -42,21 +42,8 @@ function Login() {
       // Show success toast
       toast.success('Login successful!');
 
-      // Check if user has any movies, if not redirect to create movie page
-      try {
-        const moviesResponse = await moviesAPI.getList({ page: 1, limit: 1 });
-        if (moviesResponse.total === 0 || !moviesResponse.movies || moviesResponse.movies.length === 0) {
-          // No movies, redirect to create movie page
-          navigate('/movies/create');
-        } else {
-          // Has movies, go to movie list
-          navigate('/movies');
-        }
-      } catch (error) {
-        // If error fetching movies, still go to movie list
-        console.error('Error checking movies:', error);
-        navigate('/movies');
-      }
+      // Redirect to movies list page
+      navigate('/movies');
     } catch (err: unknown) {
       // Extract error message from different response formats
       let errorMessage = 'Login failed. Please check your credentials.';

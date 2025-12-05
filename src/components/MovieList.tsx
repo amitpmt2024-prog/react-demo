@@ -86,7 +86,11 @@ function MovieList() {
         <>
           <div className="movies-grid">
             {movies.map((movie) => (
-              <div key={movie._id} className="movie-card">
+              <div 
+                key={movie._id} 
+                className="movie-card"
+                onClick={() => navigate(`/movies/${movie._id}/edit`)}
+              >
                 <div className="movie-image-container">
                   <img 
                     src={movie.imageURL || 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU'} 
