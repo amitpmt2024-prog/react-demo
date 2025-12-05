@@ -12,7 +12,7 @@
   max-width: 90%;
   height: 700px;
   max-height: 90vh;
-  background-color: #2a4a4a;
+  /* background-color: #2a4a4a; */
   border-radius: 10px;
   padding: 2rem;
   display: flex;
@@ -45,6 +45,7 @@
   flex: 1;
   display: flex;
   align-items: center;
+  background-color: #2a4a4a;
   justify-content: center;
 }
 
