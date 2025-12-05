@@ -4,10 +4,11 @@ import { toast } from 'react-toastify';
 import { authAPI } from '../services/api';
 import './Login.css';
 
-function Login() {
+function Register() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,6 +28,24 @@ function Login() {
     setLoading(true);
 
     // Frontend validation
+    if (!name || !name.trim()) {
+      setError('Name is required');
+      setLoading(false);
+      return;
+    }
+
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters long');
+      setLoading(false);
+      return;
+    }
+
+    if (name.trim().length > 100) {
+      setError('Name cannot exceed 100 characters');
+      setLoading(false);
+      return;
+    }
+
     if (!email || !email.trim()) {
       setError('Email is required');
       setLoading(false);
@@ -47,28 +66,29 @@ function Login() {
       return;
     }
 
-    try {
-      const loginCredentials = { email: email.trim(), password };
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
 
-      const response = await authAPI.login(loginCredentials);
-      
-      // Store token based on rememberMe
-      if (rememberMe) {
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('user', JSON.stringify(response.user));
-      } else {
-        sessionStorage.setItem('accessToken', response.accessToken);
-        sessionStorage.setItem('user', JSON.stringify(response.user));
-      }
+    try {
+      const registerData = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      };
+
+      const response = await authAPI.register(registerData);
 
       // Show success toast
-      toast.success('Login successful!');
+      toast.success(response.message || 'Registration successful!');
 
-      // Redirect to movies list page
-      navigate('/movies');
+      // Redirect to login page after successful registration
+      navigate('/login');
     } catch (err: unknown) {
       // Extract error message from different response formats
-      let errorMessage = 'Login failed. Please check your credentials.';
+      let errorMessage = 'Registration failed. Please try again.';
       
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { message?: string | string[]; error?: string } } };
@@ -92,7 +112,7 @@ function Login() {
       // Show error toast notification
       toast.error(errorMessage);
       
-      console.error('Login error:', err);
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }
@@ -100,8 +120,19 @@ function Login() {
 
   return (
     <div className="login-container">
-      <form className="sign-in-box" onSubmit={handleSubmit}>
-        <h1 className="sign-in-title">Sign in</h1>
+      <form className="sign-in-box" style={{ height: 'auto', minHeight: '480px' }} onSubmit={handleSubmit}>
+        <h1 className="sign-in-title">Sign up</h1>
+        
+        <div className="input-group">
+          <input
+            type="text"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="login-input"
+            required
+          />
+        </div>
         
         <div className="input-group">
           <input
@@ -124,34 +155,32 @@ function Login() {
             required
           />
         </div>
+
+        <div className="input-group">
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="login-input"
+            required
+          />
+        </div>
         
         {error && (
           <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
             {error}
           </div>
         )}
-
-        <div className="remember-me-group">
-          <input
-            type="checkbox"
-            id="remember-me"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="remember-me-checkbox"
-          />
-          <label htmlFor="remember-me" className="remember-me-label">
-            Remember me
-          </label>
-        </div>
         
         <button type="submit" className="login-button" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Registering...' : 'Register'}
         </button>
 
         <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-          <span style={{ color: 'white' }}>Don't have an account? </span>
-          <Link to="/register" style={{ color: '#4caf50', textDecoration: 'none' }}>
-            Sign up
+          <span style={{ color: 'white' }}>Already have an account? </span>
+          <Link to="/login" style={{ color: '#4caf50', textDecoration: 'none' }}>
+            Sign in
           </Link>
         </div>
       </form>
@@ -159,5 +188,5 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
 

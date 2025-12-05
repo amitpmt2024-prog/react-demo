@@ -58,6 +58,12 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export interface LoginResponse {
   user: {
     _id: string;
@@ -67,6 +73,17 @@ export interface LoginResponse {
     updatedAt: string;
   };
   accessToken: string;
+  message: string;
+}
+
+export interface RegisterResponse {
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   message: string;
 }
 
@@ -117,6 +134,39 @@ export interface QueryMoviesParams {
 }
 
 export const authAPI = {
+  register: async (registerData: RegisterRequest): Promise<RegisterResponse> => {
+    const response = await api.post('/users/register', registerData);
+    
+    // Handle transformed response format from NestJS interceptor
+    if (response.data && typeof response.data === 'object') {
+      // If response is in standard format { success, statusCode, message, data, ... }
+      if ('data' in response.data && 'success' in response.data && response.data.success) {
+        const data = response.data.data;
+        if (data && typeof data === 'object') {
+          // The data might have { user, message } structure
+          if ('user' in data) {
+            return {
+              user: data.user,
+              message: data.message || response.data.message || 'Registration successful',
+            };
+          }
+          // If user data is directly in data (without nested user object)
+          if ('email' in data && 'name' in data) {
+            return {
+              user: data,
+              message: response.data.message || 'Registration successful',
+            };
+          }
+        }
+      }
+      // If response is in old format { user, message } (fallback)
+      if ('user' in response.data && 'message' in response.data) {
+        return response.data as RegisterResponse;
+      }
+    }
+    
+    return response.data as RegisterResponse;
+  },
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const response = await api.post('/users/login', credentials);
     

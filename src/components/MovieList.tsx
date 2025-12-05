@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { moviesAPI } from '../services/api';
 import type { Movie } from '../services/api';
+import DeleteMovieModal from './DeleteMovieModal';
 import './MovieList.css';
 
 function MovieList() {
@@ -13,6 +14,12 @@ function MovieList() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 8; // Movies per page
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; movieId: string; movieTitle: string }>({
+    isOpen: false,
+    movieId: '',
+    movieTitle: '',
+  });
+  const [deleting, setDeleting] = useState(false);
 
   const fetchMovies = useCallback(async () => {
     try {
@@ -51,16 +58,21 @@ function MovieList() {
     }
   };
 
-  const handleDeleteMovie = async (e: React.MouseEvent, movieId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, movieId: string, movieTitle: string) => {
     e.stopPropagation(); // Prevent triggering the edit navigation
-    
-    if (!window.confirm('Are you sure you want to delete this movie?')) {
-      return;
-    }
+    setDeleteModal({
+      isOpen: true,
+      movieId,
+      movieTitle,
+    });
+  };
 
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
     try {
-      await moviesAPI.delete(movieId);
+      await moviesAPI.delete(deleteModal.movieId);
       toast.success('Movie deleted successfully!');
+      setDeleteModal({ isOpen: false, movieId: '', movieTitle: '' });
       // Refresh the movie list
       await fetchMovies();
     } catch (err: unknown) {
@@ -78,7 +90,13 @@ function MovieList() {
       }
       
       toast.error(errorMessage);
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, movieId: '', movieTitle: '' });
   };
 
   if (loading) {
@@ -133,7 +151,7 @@ function MovieList() {
                   />
                   <button
                     className="delete-movie-button"
-                    onClick={(e) => handleDeleteMovie(e, movie._id)}
+                    onClick={(e) => handleDeleteClick(e, movie._id, movie.title)}
                     title="Delete movie"
                   >
                     ×
@@ -184,6 +202,15 @@ function MovieList() {
           )}
         </>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteMovieModal
+        isOpen={deleteModal.isOpen}
+        movieTitle={deleteModal.movieTitle}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        loading={deleting}
+      />
     </div>
   );
 }
