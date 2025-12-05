@@ -62,7 +62,7 @@
   flex-direction: column;
   color: #fff;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: #0d192b;
   transition: transform 0.2s ease-in-out;
   cursor: pointer;
   overflow: hidden;

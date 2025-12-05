@@ -51,6 +51,17 @@ function CreateMovie() {
     setIsDragging(false);
   };
 
+  // Check if form is valid
+  const isFormValid = () => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || trimmedTitle.length > 200) return false;
+    if (!publishingYear || !publishingYear.trim()) return false;
+    const year = parseInt(publishingYear, 10);
+    if (isNaN(year) || year < 1888 || year > new Date().getFullYear() + 1) return false;
+    if (!selectedFile) return false;
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -221,7 +232,7 @@ function CreateMovie() {
                 <button
                   type="submit"
                   className="submit-button"
-                  disabled={loading}
+                  disabled={loading || !isFormValid()}
                 >
                   {loading ? 'Submitting...' : 'Submit'}
                 </button>

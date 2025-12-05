@@ -21,6 +21,15 @@ function Login() {
     }
   }, [navigate]);
 
+  // Check if form is valid
+  const isFormValid = () => {
+    if (!email || !email.trim()) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) return false;
+    if (!password || password.length < 6) return false;
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -144,7 +153,7 @@ function Login() {
           </label>
         </div>
         
-        <button type="submit" className="login-button" disabled={loading}>
+        <button type="submit" className="login-button" disabled={loading || !isFormValid()}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
 

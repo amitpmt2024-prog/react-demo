@@ -22,6 +22,17 @@ function Register() {
     }
   }, [navigate]);
 
+  // Check if form is valid
+  const isFormValid = () => {
+    if (!name || !name.trim() || name.trim().length < 2 || name.trim().length > 100) return false;
+    if (!email || !email.trim()) return false;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) return false;
+    if (!password || password.length < 6) return false;
+    if (password !== confirmPassword) return false;
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -120,7 +131,7 @@ function Register() {
 
   return (
     <div className="login-container">
-      <form className="sign-in-box" style={{ height: 'auto', minHeight: '480px' }} onSubmit={handleSubmit}>
+      <form className="sign-in-box" onSubmit={handleSubmit}>
         <h1 className="sign-in-title">Sign up</h1>
         
         <div className="input-group">
@@ -173,7 +184,7 @@ function Register() {
           </div>
         )}
         
-        <button type="submit" className="login-button" disabled={loading}>
+        <button type="submit" className="login-button" disabled={loading || !isFormValid()}>
           {loading ? 'Registering...' : 'Register'}
         </button>
 

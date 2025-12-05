@@ -213,4 +213,166 @@
   cursor: not-allowed;
 }
 
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .edit-movie-box {
+    width: 95%;
+    max-width: 95%;
+    height: auto;
+    max-height: 95vh;
+    padding: 1.5rem;
+  }
+
+  .form-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .image-upload-zone {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-movie-container {
+    padding: 1rem;
+    align-items: flex-start;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .edit-movie-box {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    padding: 1.25rem;
+  }
+
+  .edit-movie-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-content {
+    gap: 1rem;
+  }
+
+  .image-upload-zone {
+    min-height: 250px;
+  }
+
+  .drop-zone-content {
+    gap: 0.75rem;
+  }
+
+  .arrow-icon {
+    font-size: 2rem;
+  }
+
+  .drop-text {
+    font-size: 0.9rem;
+  }
+
+  .form-fields {
+    gap: 1rem;
+    padding-top: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.8rem;
+  }
+
+  .form-input {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+  }
+
+  .cancel-button,
+  .update-button {
+    width: 100%;
+    padding: 0.7rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-movie-container {
+    padding: 0.5rem;
+  }
+
+  .edit-movie-box {
+    padding: 1rem;
+  }
+
+  .edit-movie-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .image-upload-zone {
+    min-height: 200px;
+  }
+
+  .arrow-icon {
+    font-size: 1.75rem;
+  }
+
+  .drop-text {
+    font-size: 0.85rem;
+  }
+
+  .form-fields {
+    gap: 0.75rem;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-input {
+    font-size: 0.85rem;
+    padding: 0.65rem;
+  }
+
+  .form-buttons {
+    gap: 0.5rem;
+  }
+
+  .cancel-button,
+  .update-button {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .edit-movie-box {
+    padding: 0.75rem;
+  }
+
+  .edit-movie-title {
+    font-size: 1.1rem;
+  }
+
+  .image-upload-zone {
+    min-height: 180px;
+  }
+
+  .arrow-icon {
+    font-size: 1.5rem;
+  }
+
+  .drop-text {
+    font-size: 0.8rem;
+  }
+}
+
 
