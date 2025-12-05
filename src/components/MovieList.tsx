@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { moviesAPI } from '../services/api';
 import type { Movie } from '../services/api';
 import './MovieList.css';
@@ -13,11 +14,7 @@ function MovieList() {
   const [total, setTotal] = useState(0);
   const limit = 8; // Movies per page
 
-  useEffect(() => {
-    fetchMovies();
-  }, [currentPage]);
-
-  const fetchMovies = async () => {
+  const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
       const response = await moviesAPI.getList({ page: currentPage, limit });
@@ -30,7 +27,11 @@ function MovieList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit]);
+
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
 
   const handleAddMovie = () => {
     navigate('/movies/create');
@@ -50,16 +51,46 @@ function MovieList() {
     }
   };
 
+  const handleDeleteMovie = async (e: React.MouseEvent, movieId: string) => {
+    e.stopPropagation(); // Prevent triggering the edit navigation
+    
+    if (!window.confirm('Are you sure you want to delete this movie?')) {
+      return;
+    }
+
+    try {
+      await moviesAPI.delete(movieId);
+      toast.success('Movie deleted successfully!');
+      // Refresh the movie list
+      await fetchMovies();
+    } catch (err: unknown) {
+      let errorMessage = 'Failed to delete movie. Please try again.';
+      
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string | string[] } } };
+        if (axiosError.response?.data?.message) {
+          errorMessage = Array.isArray(axiosError.response.data.message)
+            ? axiosError.response.data.message[0]
+            : axiosError.response.data.message;
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      toast.error(errorMessage);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="movie-list-container">
+      <div className="">
         <div style={{ color: 'white' }}>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="movie-list-container">
+    <div className="">
       {/* Header */}
       <div className="movie-list-header">
         <div className="header-left">
@@ -100,6 +131,13 @@ function MovieList() {
                       (e.target as HTMLImageElement).src = 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU';
                     }}
                   />
+                  <button
+                    className="delete-movie-button"
+                    onClick={(e) => handleDeleteMovie(e, movie._id)}
+                    title="Delete movie"
+                  >
+                    ×
+                  </button>
                 </div>
                 <div className="movie-info">
                   <h3 className="movie-title">{movie.title}</h3>
@@ -108,6 +146,13 @@ function MovieList() {
               </div>
             ))}
           </div>
+
+          {/* Record Count */}
+          {total > 0 && (
+            <div className="record-count">
+              Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, total)} of {total} movies
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (

@@ -1,11 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { moviesAPI } from '../services/api';
+import { moviesAPI, uploadAPI } from '../services/api';
 import './EditMovie.css';
-
-// Static image URL as provided
-const STATIC_IMAGE_URL = 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU';
 
 function EditMovie() {
   const navigate = useNavigate();
@@ -13,21 +10,14 @@ function EditMovie() {
   const [title, setTitle] = useState('');
   const [publishingYear, setPublishingYear] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [originalImageURL, setOriginalImageURL] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  useEffect(() => {
-    if (id) {
-      fetchMovie();
-    } else {
-      setError('Movie ID is missing');
-      setFetching(false);
-    }
-  }, [id]);
-
-  const fetchMovie = async () => {
+  const fetchMovie = useCallback(async () => {
     try {
       setFetching(true);
       const response = await moviesAPI.getOne(id!);
@@ -35,7 +25,9 @@ function EditMovie() {
       
       setTitle(movie.title || '');
       setPublishingYear(movie.publishYear?.toString() || '');
-      setSelectedImage(movie.imageURL || null);
+      const imageUrl = movie.imageURL || null;
+      setSelectedImage(imageUrl);
+      setOriginalImageURL(imageUrl);
     } catch (err: unknown) {
       let errorMessage = 'Failed to fetch movie. Please try again.';
       
@@ -59,7 +51,16 @@ function EditMovie() {
     } finally {
       setFetching(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchMovie();
+    } else {
+      setError('Movie ID is missing');
+      setFetching(false);
+    }
+  }, [id, fetchMovie]);
 
   const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -67,6 +68,7 @@ function EditMovie() {
     
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setSelectedImage(event.target?.result as string);
@@ -78,6 +80,7 @@ function EditMovie() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setSelectedImage(event.target?.result as string);
@@ -102,7 +105,25 @@ function EditMovie() {
     setLoading(true);
 
     try {
+      // Validate title
+      const trimmedTitle = title.trim();
+      if (!trimmedTitle) {
+        setError('Title is required');
+        setLoading(false);
+        return;
+      }
+      if (trimmedTitle.length > 200) {
+        setError('Title cannot exceed 200 characters');
+        setLoading(false);
+        return;
+      }
+
       // Validate publishing year
+      if (!publishingYear || !publishingYear.trim()) {
+        setError('Publishing year is required');
+        setLoading(false);
+        return;
+      }
       const year = parseInt(publishingYear, 10);
       if (isNaN(year) || year < 1888 || year > new Date().getFullYear() + 1) {
         setError('Please enter a valid publishing year (1888 to ' + (new Date().getFullYear() + 1) + ')');
@@ -110,11 +131,25 @@ function EditMovie() {
         return;
       }
 
-      // Use static image URL as specified
+      let imageURL = originalImageURL;
+
+      // If a new image was selected, upload it
+      if (selectedFile) {
+        const uploadResponse = await uploadAPI.uploadImage(selectedFile);
+        imageURL = `http://localhost:3000${uploadResponse.imageURL}`;
+      }
+
+      // If no image exists and no new image was selected, show error
+      if (!imageURL) {
+        setError('Please select an image');
+        setLoading(false);
+        return;
+      }
+
       const movieData = {
-        title: title.trim(),
+        title: trimmedTitle,
         publishYear: year,
-        imageURL: STATIC_IMAGE_URL,
+        imageURL: imageURL,
       };
 
       const response = await moviesAPI.update(id!, movieData);

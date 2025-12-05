@@ -5,31 +5,44 @@ import { authAPI } from '../services/api';
 import './Login.css';
 
 function Login() {
-  const [emailOrUserName, setEmailOrUserName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Helper function to check if input is an email
-  const isEmail = (value: string): boolean => {
-    return value.includes('@') && value.includes('.');
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    // Frontend validation
+    if (!email || !email.trim()) {
+      setError('Email is required');
+      setLoading(false);
+      return;
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Determine if input is email or userName
-      const loginCredentials = isEmail(emailOrUserName)
-        ? { email: emailOrUserName, password }
-        : { userName: emailOrUserName, password };
+      const loginCredentials = { email: email.trim(), password };
 
       const response = await authAPI.login(loginCredentials);
-      console.log('res',response);
+      
       // Store token based on rememberMe
       if (rememberMe) {
         localStorage.setItem('accessToken', response.accessToken);
@@ -83,10 +96,10 @@ function Login() {
         
         <div className="input-group">
           <input
-            type="text"
-            placeholder="Email or Username"
-            value={emailOrUserName}
-            onChange={(e) => setEmailOrUserName(e.target.value)}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="login-input"
             required
           />

@@ -54,8 +54,7 @@ api.interceptors.response.use(
 );
 
 export interface LoginRequest {
-  userName?: string;
-  email?: string;
+  email: string;
   password: string;
 }
 
@@ -145,6 +144,40 @@ export const authAPI = {
   },
 };
 
+export interface UploadImageResponse {
+  imageURL: string;
+  filename: string;
+  message: string;
+}
+
+export const uploadAPI = {
+  uploadImage: async (file: File): Promise<UploadImageResponse> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await api.post<UploadImageResponse>('/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    // Handle transformed response format
+    if (response.data && typeof response.data === 'object') {
+      if ('data' in response.data && 'success' in response.data && response.data.success) {
+        const data = response.data.data;
+        if (data && typeof data === 'object' && 'imageURL' in data) {
+          return data as UploadImageResponse;
+        }
+      }
+      if ('imageURL' in response.data) {
+        return response.data as UploadImageResponse;
+      }
+    }
+
+    return response.data as UploadImageResponse;
+  },
+};
+
 export const moviesAPI = {
   create: async (movieData: CreateMovieRequest): Promise<CreateMovieResponse> => {
     const response = await api.post<CreateMovieResponse>('/movies', movieData);
@@ -216,6 +249,24 @@ export const moviesAPI = {
     }
     
     return response.data as UpdateMovieResponse;
+  },
+  delete: async (id: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/movies/${id}`);
+    
+    // Handle transformed response format
+    if (response.data && typeof response.data === 'object') {
+      if ('data' in response.data && 'success' in response.data && response.data.success) {
+        const data = response.data.data;
+        if (data && typeof data === 'object' && 'message' in data) {
+          return data as { message: string };
+        }
+      }
+      if ('message' in response.data) {
+        return response.data as { message: string };
+      }
+    }
+    
+    return response.data as { message: string };
   },
 };
 

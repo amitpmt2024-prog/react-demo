@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { moviesAPI } from '../services/api';
+import { moviesAPI, uploadAPI } from '../services/api';
 import './CreateMovie.css';
-
-// Static image URL as provided
-const STATIC_IMAGE_URL = 'https://fastly.picsum.photos/id/0/5000/3333.jpg?hmac=_j6ghY5fCfSD6tvtcV74zXivkJSPIfR9B8w34XeQmvU';
 
 function CreateMovie() {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [publishingYear, setPublishingYear] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,6 +20,7 @@ function CreateMovie() {
     
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setSelectedImage(event.target?.result as string);
@@ -33,6 +32,7 @@ function CreateMovie() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setSelectedImage(event.target?.result as string);
@@ -57,7 +57,25 @@ function CreateMovie() {
     setLoading(true);
 
     try {
+      // Validate title
+      const trimmedTitle = title.trim();
+      if (!trimmedTitle) {
+        setError('Title is required');
+        setLoading(false);
+        return;
+      }
+      if (trimmedTitle.length > 200) {
+        setError('Title cannot exceed 200 characters');
+        setLoading(false);
+        return;
+      }
+
       // Validate publishing year
+      if (!publishingYear || !publishingYear.trim()) {
+        setError('Publishing year is required');
+        setLoading(false);
+        return;
+      }
       const year = parseInt(publishingYear, 10);
       if (isNaN(year) || year < 1888 || year > new Date().getFullYear() + 1) {
         setError('Please enter a valid publishing year (1888 to ' + (new Date().getFullYear() + 1) + ')');
@@ -65,11 +83,22 @@ function CreateMovie() {
         return;
       }
 
-      // Use static image URL as specified
+      // Validate image is selected
+      if (!selectedFile) {
+        setError('Please select an image');
+        setLoading(false);
+        return;
+      }
+
+      // Upload image first
+      const uploadResponse = await uploadAPI.uploadImage(selectedFile);
+      const imageURL = `http://localhost:3000${uploadResponse.imageURL}`;
+
+      // Create movie with uploaded image URL
       const movieData = {
-        title: title.trim(),
+        title: trimmedTitle,
         publishYear: year,
-        imageURL: STATIC_IMAGE_URL,
+        imageURL: imageURL,
       };
 
       const response = await moviesAPI.create(movieData);
