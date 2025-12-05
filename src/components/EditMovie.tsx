@@ -17,6 +17,15 @@ function EditMovie() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  // Check if user is authenticated
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    if (!token) {
+      // No token found, redirect to login
+      navigate('/login', { replace: true });
+    }
+  }, [navigate]);
+
   const fetchMovie = useCallback(async () => {
     try {
       setFetching(true);

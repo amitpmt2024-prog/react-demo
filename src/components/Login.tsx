@@ -7,7 +7,10 @@ import './Login.css';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  // Check if user previously logged in with "Remember me" (token in localStorage)
+  const [rememberMe, setRememberMe] = useState(() => {
+    return !!localStorage.getItem('accessToken');
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -60,6 +63,12 @@ function Login() {
       const loginCredentials = { email: email.trim(), password };
 
       const response = await authAPI.login(loginCredentials);
+      
+      // Clear existing tokens from both storages first
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('user');
       
       // Store token based on rememberMe
       if (rememberMe) {

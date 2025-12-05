@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { moviesAPI, uploadAPI } from '../services/api';
@@ -13,6 +13,15 @@ function CreateMovie() {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check if user is authenticated
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    if (!token) {
+      // No token found, redirect to login
+      navigate('/login', { replace: true });
+    }
+  }, [navigate]);
 
   const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

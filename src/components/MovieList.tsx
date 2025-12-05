@@ -21,6 +21,15 @@ function MovieList() {
   });
   const [deleting, setDeleting] = useState(false);
 
+  // Check if user is authenticated
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    if (!token) {
+      // No token found, redirect to login
+      navigate('/login', { replace: true });
+    }
+  }, [navigate]);
+
   const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
