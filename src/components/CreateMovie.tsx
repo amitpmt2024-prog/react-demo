@@ -112,7 +112,10 @@ function CreateMovie() {
 
       // Upload image first
       const uploadResponse = await uploadAPI.uploadImage(selectedFile);
-      const imageURL = `http://localhost:3000${uploadResponse.imageURL}`;
+      // In production (same origin), use relative path; in dev, use full URL
+      const imageURL = uploadResponse.imageURL.startsWith('http')
+        ? uploadResponse.imageURL
+        : `${window.location.origin}${uploadResponse.imageURL}`;
 
       // Create movie with uploaded image URL
       const movieData = {

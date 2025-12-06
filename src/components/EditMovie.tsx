@@ -157,7 +157,10 @@ function EditMovie() {
       // If a new image was selected, upload it
       if (selectedFile) {
         const uploadResponse = await uploadAPI.uploadImage(selectedFile);
-        imageURL = `http://localhost:3000${uploadResponse.imageURL}`;
+        // In production (same origin), use relative path; in dev, use full URL
+        imageURL = uploadResponse.imageURL.startsWith('http')
+          ? uploadResponse.imageURL
+          : `${window.location.origin}${uploadResponse.imageURL}`;
       }
 
       // If no image exists and no new image was selected, show error
