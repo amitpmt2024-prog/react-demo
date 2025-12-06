@@ -10,6 +10,10 @@ function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -22,63 +26,89 @@ function Register() {
     }
   }, [navigate]);
 
-  // Check if form is valid
-  const isFormValid = () => {
-    if (!name || !name.trim() || name.trim().length < 2 || name.trim().length > 100) return false;
-    if (!email || !email.trim()) return false;
+  // Validate name field
+  const validateName = (nameValue: string): string => {
+    if (!nameValue || !nameValue.trim()) {
+      return 'Name is required';
+    }
+    if (nameValue.trim().length < 2) {
+      return 'Name must be at least 2 characters long';
+    }
+    if (nameValue.trim().length > 100) {
+      return 'Name cannot exceed 100 characters';
+    }
+    return '';
+  };
+
+  // Validate email field
+  const validateEmail = (emailValue: string): string => {
+    if (!emailValue || !emailValue.trim()) {
+      return 'Email is required';
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) return false;
-    if (!password || password.length < 6) return false;
-    if (password !== confirmPassword) return false;
-    return true;
+    if (!emailRegex.test(emailValue.trim())) {
+      return 'Please enter a valid email';
+    }
+    return '';
+  };
+
+  // Validate password field
+  const validatePassword = (passwordValue: string): string => {
+    if (!passwordValue || !passwordValue.trim()) {
+      return 'Password is required';
+    }
+    if (passwordValue.length < 6 || !/[a-zA-Z]/.test(passwordValue)) {
+      return 'Password should contain at least 6 characters and 1 alphabetical character';
+    }
+    return '';
+  };
+
+  // Validate confirm password field
+  const validateConfirmPassword = (confirmPasswordValue: string, passwordValue: string): string => {
+    if (!confirmPasswordValue || !confirmPasswordValue.trim()) {
+      return 'Confirm password is required';
+    }
+    if (confirmPasswordValue !== passwordValue) {
+      return 'Passwords do not match';
+    }
+    return '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
     setLoading(true);
 
-    // Frontend validation
-    if (!name || !name.trim()) {
-      setError('Name is required');
+    // Validate all fields
+    const nameValidationError = validateName(name);
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+    const confirmPasswordValidationError = validateConfirmPassword(confirmPassword, password);
+
+    if (nameValidationError) {
+      setNameError(nameValidationError);
       setLoading(false);
       return;
     }
 
-    if (name.trim().length < 2) {
-      setError('Name must be at least 2 characters long');
+    if (emailValidationError) {
+      setEmailError(emailValidationError);
       setLoading(false);
       return;
     }
 
-    if (name.trim().length > 100) {
-      setError('Name cannot exceed 100 characters');
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
       setLoading(false);
       return;
     }
 
-    if (!email || !email.trim()) {
-      setError('Email is required');
-      setLoading(false);
-      return;
-    }
-
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address');
-      setLoading(false);
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    if (confirmPasswordValidationError) {
+      setConfirmPasswordError(confirmPasswordValidationError);
       setLoading(false);
       return;
     }
@@ -139,21 +169,45 @@ function Register() {
             type="text"
             placeholder="Name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="login-input"
-            required
+            onChange={(e) => {
+              setName(e.target.value);
+              if (nameError) {
+                setNameError('');
+              }
+            }}
+            onBlur={() => {
+              setNameError(validateName(name));
+            }}
+            className={`login-input ${nameError ? 'input-error' : ''}`}
           />
+          {nameError && (
+            <div className="field-error-message">
+              {nameError}
+            </div>
+          )}
         </div>
         
         <div className="input-group">
           <input
-            type="email"
+            type="text"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="login-input"
-            required
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) {
+                setEmailError('');
+              }
+            }}
+            onBlur={() => {
+              setEmailError(validateEmail(email));
+            }}
+            className={`login-input ${emailError ? 'input-error' : ''}`}
           />
+          {emailError && (
+            <div className="field-error-message">
+              {emailError}
+            </div>
+          )}
         </div>
         
         <div className="input-group">
@@ -161,10 +215,29 @@ function Register() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="login-input"
-            required
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (passwordError) {
+                setPasswordError('');
+              }
+              // Re-validate confirm password if it has a value
+              if (confirmPassword) {
+                setConfirmPasswordError(validateConfirmPassword(confirmPassword, e.target.value));
+              }
+            }}
+            onBlur={() => {
+              setPasswordError(validatePassword(password));
+              if (confirmPassword) {
+                setConfirmPasswordError(validateConfirmPassword(confirmPassword, password));
+              }
+            }}
+            className={`login-input ${passwordError ? 'input-error' : ''}`}
           />
+          {passwordError && (
+            <div className="field-error-message">
+              {passwordError}
+            </div>
+          )}
         </div>
 
         <div className="input-group">
@@ -172,25 +245,37 @@ function Register() {
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="login-input"
-            required
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (confirmPasswordError) {
+                setConfirmPasswordError('');
+              }
+            }}
+            onBlur={() => {
+              setConfirmPasswordError(validateConfirmPassword(confirmPassword, password));
+            }}
+            className={`login-input ${confirmPasswordError ? 'input-error' : ''}`}
           />
+          {confirmPasswordError && (
+            <div className="field-error-message">
+              {confirmPasswordError}
+            </div>
+          )}
         </div>
         
         {error && (
-          <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
+          <div className="error-message-container">
             {error}
           </div>
         )}
         
-        <button type="submit" className="login-button" disabled={loading || !isFormValid()}>
+        <button type="submit" className="login-button" disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>
 
-        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-          <span style={{ color: 'white' }}>Already have an account? </span>
-          <Link to="/login" style={{ color: '#4caf50', textDecoration: 'none' }}>
+        <div className="signup-link-container">
+          <span>Already have an account? </span>
+          <Link to="/login">
             Sign in
           </Link>
         </div>

@@ -12,6 +12,8 @@ function Login() {
     return !!localStorage.getItem('accessToken');
   });
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -24,37 +26,48 @@ function Login() {
     }
   }, [navigate]);
 
-  // Check if form is valid
-  const isFormValid = () => {
-    if (!email || !email.trim()) return false;
+  // Validate email field
+  const validateEmail = (emailValue: string): string => {
+    if (!emailValue || !emailValue.trim()) {
+      return 'Email is required';
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) return false;
-    if (!password || password.length < 6) return false;
-    return true;
+    if (!emailRegex.test(emailValue.trim())) {
+      return 'Please enter a valid email';
+    }
+    return '';
+  };
+
+  // Validate password field
+  const validatePassword = (passwordValue: string): string => {
+    if (!passwordValue || !passwordValue.trim()) {
+      return 'Password is required';
+    }
+    if (passwordValue.length < 6 || !/[a-zA-Z]/.test(passwordValue)) {
+      return 'Password should contain at least 6 characters and 1 alphabetical character';
+    }
+    return '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setEmailError('');
+    setPasswordError('');
     setLoading(true);
 
-    // Frontend validation
-    if (!email || !email.trim()) {
-      setError('Email is required');
+    // Validate all fields
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+
+    if (emailValidationError) {
+      setEmailError(emailValidationError);
       setLoading(false);
       return;
     }
 
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address');
-      setLoading(false);
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
       setLoading(false);
       return;
     }
@@ -123,13 +136,25 @@ function Login() {
         
         <div className="input-group">
           <input
-            type="email"
+            type="text"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="login-input"
-            required
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) {
+                setEmailError('');
+              }
+            }}
+            onBlur={() => {
+              setEmailError(validateEmail(email));
+            }}
+            className={`login-input ${emailError ? 'input-error' : ''}`}
           />
+          {emailError && (
+            <div className="field-error-message">
+              {emailError}
+            </div>
+          )}
         </div>
         
         <div className="input-group">
@@ -137,14 +162,26 @@ function Login() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="login-input"
-            required
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (passwordError) {
+                setPasswordError('');
+              }
+            }}
+            onBlur={() => {
+              setPasswordError(validatePassword(password));
+            }}
+            className={`login-input ${passwordError ? 'input-error' : ''}`}
           />
+          {passwordError && (
+            <div className="field-error-message">
+              {passwordError}
+            </div>
+          )}
         </div>
         
         {error && (
-          <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
+          <div className="error-message-container">
             {error}
           </div>
         )}
@@ -162,13 +199,13 @@ function Login() {
           </label>
         </div>
         
-        <button type="submit" className="login-button" disabled={loading || !isFormValid()}>
+        <button type="submit" className="login-button" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
 
-        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-          <span style={{ color: 'white' }}>Don't have an account? </span>
-          <Link to="/register" style={{ color: '#4caf50', textDecoration: 'none' }}>
+        <div className="signup-link-container">
+          <span>Don't have an account? </span>
+          <Link to="/register">
             Sign up
           </Link>
         </div>

@@ -108,18 +108,6 @@ function EditMovie() {
     setIsDragging(false);
   };
 
-  // Check if form is valid
-  const isFormValid = () => {
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle || trimmedTitle.length > 200) return false;
-    if (!publishingYear || !publishingYear.trim()) return false;
-    const year = parseInt(publishingYear, 10);
-    if (isNaN(year) || year < 1888 || year > new Date().getFullYear() + 1) return false;
-    // For edit, we need either original image or new selected file
-    if (!originalImageURL && !selectedFile) return false;
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -306,7 +294,7 @@ function EditMovie() {
                 <button
                   type="submit"
                   className="update-button"
-                  disabled={loading || !isFormValid()}
+                  disabled={loading}
                 >
                   {loading ? 'Updating...' : 'Update'}
                 </button>
