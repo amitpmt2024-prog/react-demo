@@ -47,7 +47,7 @@ function Register() {
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailValue.trim())) {
-      return 'Please enter a valid email';
+      return 'Please enter a valid email address';
     }
     return '';
   };
