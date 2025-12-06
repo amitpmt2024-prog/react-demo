@@ -43,3 +43,4 @@ function DeleteMovieModal({ isOpen, movieTitle, onConfirm, onCancel, loading = f
 
 export default DeleteMovieModal;
 
+
