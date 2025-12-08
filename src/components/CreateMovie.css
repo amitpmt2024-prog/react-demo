@@ -236,6 +236,7 @@
     align-items: flex-start;
     min-height: 100vh;
     height: auto;
+    overflow-y: auto;
   }
 
   .create-movie-box {
@@ -244,11 +245,13 @@
     height: auto;
     max-height: none;
     padding: 1.25rem;
+    margin: 0;
   }
 
   .create-movie-title {
     font-size: 1.25rem;
     margin-bottom: 1rem;
+    text-align: center;
   }
 
   .form-content {
@@ -257,6 +260,7 @@
 
   .image-upload-zone {
     min-height: 250px;
+    width: 100%;
   }
 
   .drop-zone-content {
@@ -274,43 +278,65 @@
   .form-fields {
     gap: 1rem;
     padding-top: 0.5rem;
+    width: 100%;
   }
 
   .form-input {
     font-size: 0.9rem;
-    padding: 0.75rem;
+    padding: 0.875rem;
+    min-height: 44px; /* Better touch target */
   }
 
   .form-buttons {
     flex-direction: column;
     gap: 0.75rem;
     padding-top: 1rem;
+    width: 100%;
   }
 
-  .cancel-button,
   .submit-button {
     width: 100%;
-    padding: 0.7rem 1.25rem;
-    font-size: 0.95rem;
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    min-height: 48px; /* Better touch target */
+  }
+
+  .cancel-button {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    min-height: 48px; /* Better touch target */
   }
 }
 
 @media (max-width: 480px) {
   .create-movie-container {
     padding: 0.5rem;
+    overflow-y: auto;
   }
 
   .create-movie-box {
     padding: 1rem;
+    border-radius: 8px;
   }
 
   .create-movie-title {
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .form-content {
+    gap: 0.75rem;
   }
 
   .image-upload-zone {
     min-height: 200px;
+    width: 100%;
+  }
+
+  .drop-zone {
+    border-width: 1.5px;
   }
 
   .arrow-icon {
@@ -323,31 +349,46 @@
 
   .form-fields {
     gap: 0.75rem;
+    padding-top: 0.25rem;
   }
 
   .form-input {
-    font-size: 0.85rem;
-    padding: 0.65rem;
+    font-size: 0.9rem;
+    padding: 0.875rem;
+    min-height: 44px;
   }
 
   .form-buttons {
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
   }
 
-  .cancel-button,
-  .submit-button {
-    padding: 0.65rem 1rem;
-    font-size: 0.9rem;
+  .submit-button,
+  .cancel-button {
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+    width: 100%;
   }
 }
 
 @media (max-width: 360px) {
+  .create-movie-container {
+    padding: 0.5rem;
+  }
+
   .create-movie-box {
     padding: 0.75rem;
+    border-radius: 6px;
   }
 
   .create-movie-title {
     font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-content {
+    gap: 0.5rem;
   }
 
   .image-upload-zone {
@@ -360,6 +401,28 @@
 
   .drop-text {
     font-size: 0.8rem;
+  }
+
+  .form-fields {
+    gap: 0.5rem;
+  }
+
+  .form-input {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    min-height: 42px;
+  }
+
+  .form-buttons {
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .submit-button,
+  .cancel-button {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9rem;
+    min-height: 44px;
   }
 }
 

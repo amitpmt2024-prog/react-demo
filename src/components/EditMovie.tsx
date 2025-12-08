@@ -285,18 +285,18 @@ function EditMovie() {
 
               <div className="form-buttons">
                 <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="cancel-button"
-                >
-                  Cancel
-                </button>
-                <button
                   type="submit"
                   className="update-button"
                   disabled={loading}
                 >
                   {loading ? 'Updating...' : 'Update'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="cancel-button"
+                >
+                  Cancel
                 </button>
               </div>
             </div>

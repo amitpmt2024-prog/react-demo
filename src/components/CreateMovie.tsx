@@ -224,18 +224,18 @@ function CreateMovie() {
 
               <div className="form-buttons">
                 <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="cancel-button"
-                >
-                  Cancel
-                </button>
-                <button
                   type="submit"
                   className="submit-button"
                   disabled={loading}
                 >
                   {loading ? 'Submitting...' : 'Submit'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="cancel-button"
+                >
+                  Cancel
                 </button>
               </div>
             </div>

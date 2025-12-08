@@ -117,20 +117,30 @@ function MovieList() {
   }
 
   return (
-    <div className="">
-      {/* Header */}
-      <div className="movie-list-header">
-        <div className="header-left">
-          <h1 className="page-title">My movies</h1>
-          <button className="create-movie-icon-button" onClick={handleAddMovie} title="Add movie">
-            <span className="plus-icon">+</span>
+    <div className={`movie-list-container ${movies.length === 0 ? 'empty-state-container' : ''}`}>
+      {/* Header - Only show "My movies" and + icon when there are movies */}
+      {movies.length > 0 ? (
+        <div className="movie-list-header">
+          <div className="header-left">
+            <h1 className="page-title">My movies</h1>
+            <button className="create-movie-icon-button" onClick={handleAddMovie} title="Add movie">
+              <span className="plus-icon">+</span>
+            </button>
+          </div>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+            <span className="logout-icon">→</span>
           </button>
         </div>
-        <button className="logout-button" onClick={handleLogout}>
-          Logout
-          <span className="logout-icon">→</span>
-        </button>
-      </div>
+      ) : (
+        <div className="movie-list-header empty-header">
+          <div className="header-left"></div>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+            <span className="logout-icon">→</span>
+          </button>
+        </div>
+      )}
 
       {/* Movies Grid */}
       {movies.length === 0 ? (
